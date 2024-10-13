@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Recommended Playlist</title>
+  <style>
+    /* Add some basic styling for better visibility */
+    body {
+      font-family: Arial, sans-serif;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+    }
+    button {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Your Recommended Playlist</h1>
+  <ul id="playlist"></ul>
+  <input type="text" id="newSong" placeholder="Enter song name to add" />
+  <button id="addSongButton">Add Song</button>
+  <button id="saveButton">Save Playlist</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const playlistElement = document.getElementById('playlist');
+  
+      // Check if playlistElement exists
+      if (!playlistElement) {
+        console.error('Playlist element not found!');
+        return; // Exit the script if the element is not found
+      }
+  
+      fetch('/api/generate-playlist')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && Array.isArray(data.playlist)) {
+            const playlist = data.playlist;
+  
+            // Clear existing list items
+            playlistElement.innerHTML = '';
+  
+            playlist.forEach(track => {
+              const listItem = document.createElement('li');
+              listItem.innerHTML = `
+                ${track.name} by ${track.artists.map(artist => artist.name).join(', ')}
+                <audio controls>
+                  <source src="${track.preview_url}" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+                <button class="removeSongButton">-</button>
+              `;
+              playlistElement.appendChild(listItem);
+            });
+  
+            // Add event listener for remove buttons
+            const removeButtons = document.querySelectorAll('.removeSongButton');
+            removeButtons.forEach((button, index) => {
+              button.addEventListener('click', () => {
+                // Replace '-' button with Manual and Generate buttons
+                const songName = playlist[index].name; // Get the song name to generate a replacement later
+                button.classList.add('hidden'); // Hide the remove button
+                const manualButton = document.createElement('button');
+                manualButton.innerText = 'Manual';
+                const generateButton = document.createElement('button');
+                generateButton.innerText = 'Generate';
+  
+                manualButton.addEventListener('click', async () => {
+                  // Show input field to add a song manually
+                  const manualInput = document.createElement('input');
+                  manualInput.placeholder = 'Enter song name';
+                  const addManualButton = document.createElement('button');
+                  addManualButton.innerText = 'Add';
+                  addManualButton.addEventListener('click', async () => {
+                    const newSongName = manualInput.value;
+                    if (newSongName) {
+                      try {
+                        const response = await fetch('/api/add-song', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ songName: newSongName }),
+                        });
+                        const songData = await response.json();
+                        if (response.ok) {
+                          const newSongItem = document.createElement('li');
+                          newSongItem.innerHTML = `
+                            ${songData.name} by ${songData.artists.map(artist => artist.name).join(', ')}
+                            <audio controls>
+                              <source src="${songData.preview_url}" type="audio/mpeg">
+                              Your browser does not support the audio element.
+                            </audio>
+                            <button class="removeSongButton">-</button>
+                          `;
+                          playlistElement.appendChild(newSongItem);
+                          newSongItem.querySelector('.removeSongButton').addEventListener('click', () => {
+                            newSongItem.remove(); // Remove new song
+                          });
+                          manualInput.value = ''; // Clear input
+                        } else {
+                          alert('Error adding song: ' + songData.error);
+                        }
+                      } catch (error) {
+                        console.error('Error adding song:', error);
+                      }
+                    }
+                  });
+                  playlistElement.appendChild(manualInput);
+                  playlistElement.appendChild(addManualButton);
+                });
+  
+                generateButton.addEventListener('click', async () => {
+                  // Generate a replacement song
+                  const response = await fetch('/api/generate-song', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      selectedGenres: userPreferences.selectedGenres,
+                      selectedMoods: userPreferences.selectedMoods,
+                      sampleSongs: userPreferences.sampleSongs,
+                      setDuration: userPreferences.setDuration,
+                    }),
+                  });
+                  const generatedSong = await response.json();
+                  if (response.ok) {
+                    const replacementItem = document.createElement('li');
+                    replacementItem.innerHTML = `
+                      ${generatedSong.name} by ${generatedSong.artists.map(artist => artist.name).join(', ')}
+                      <audio controls>
+                        <source src="${generatedSong.preview_url}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                      </audio>
+                      <button class="removeSongButton">-</button>
+                    `;
+                    playlistElement.appendChild(replacementItem);
+                    replacementItem.querySelector('.removeSongButton').addEventListener('click', () => {
+                      replacementItem.remove(); // Remove replacement song
+                    });
+                  } else {
+                    alert('Error generating song: ' + generatedSong.error);
+                  }
+                });
+  
+                playlistElement.appendChild(manualButton);
+                playlistElement.appendChild(generateButton);
+              });
+            });
+          } else {
+            console.error('Playlist data is not valid:', data);
+            alert('No tracks found in your playlist.');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching playlist:', error);
+          alert('Failed to fetch playlist. Please try again later.');
+        });
+    });
+  
+    document.getElementById('saveButton').addEventListener('click', () => {
+      alert('Playlist saved!');
+      // Implement save functionality (e.g., save to user account or export)
+    });
+  </script>
+  
+  
+</body>
+</html>

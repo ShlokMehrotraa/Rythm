@@ -1,0 +1,42 @@
+<!-- duration.html (for example) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Duration</title>
+</head>
+<body>
+    <h1>Select Duration</h1>
+    <form id="durationForm">
+        <label for="duration">Duration (in minutes):</label>
+        <select id="duration" name="duration">
+            <option value="10">10 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="20">20 minutes</option>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('durationForm').addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the default form submission
+
+            const selectedDuration = document.getElementById('duration').value;
+
+            // Send duration as a number
+            fetch('/api/duration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ duration: Number(selectedDuration) }) // Convert to number
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Optionally redirect to the next page after success
+                window.location.href = '/sample-songs.html'; // Adjust the path as needed
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

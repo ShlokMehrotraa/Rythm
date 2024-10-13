@@ -1,0 +1,53 @@
+<!-- languages.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Languages</title>
+</head>
+<body>
+  <h1>Select Up to 2 Languages</h1>
+  <form id="languageForm">
+    <label><input type="checkbox" name="languages" value="English"> English</label>
+    <label><input type="checkbox" name="languages" value="Hindi"> Hindi</label>
+    <label><input type="checkbox" name="languages" value="Punjabi"> Punjabi</label>
+    <label><input type="checkbox" name="languages" value="Español"> Español</label>
+    <label><input type="checkbox" name="languages" value="French"> French</label>
+    <label><input type="checkbox" name="languages" value="German"> German</label>
+    <label><input type="checkbox" name="languages" value="Mandarin"> Mandarin</label>
+    <label><input type="checkbox" name="languages" value="Japanese"> Japanese</label>
+    
+    <button type="button" id="nextButton">Next</button>
+  </form>
+
+  <script>
+    document.getElementById('nextButton').addEventListener('click', () => {
+      const form = document.getElementById('languageForm');
+      const selectedLanguages = Array.from(form.languages)
+        .filter(language => language.checked)
+        .map(language => language.value);
+
+      if (selectedLanguages.length > 2) {
+        alert('You can select up to 2 languages.');
+        return;
+      }
+
+      fetch('/api/languages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ languages: selectedLanguages }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          window.location.href = 'duration.html';  // Redirect to the Duration page
+        }
+      });
+    });
+  </script>
+</body>
+</html>

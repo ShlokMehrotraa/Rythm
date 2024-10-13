@@ -1,0 +1,60 @@
+<!-- samplesongs.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Sample Songs</title>
+</head>
+<body>
+  <h1>Select Up to 5 Sample Songs</h1>
+  <input type="text" id="songInput" placeholder="Enter song name">
+  <button type="button" id="addSongButton">Add Song</button>
+  
+  <ul id="songList"></ul>
+
+  <button type="button" id="nextButton">Next</button>
+
+  <script>
+    let selectedSongs = [];
+
+    document.getElementById('addSongButton').addEventListener('click', () => {
+      const songInput = document.getElementById('songInput');
+      const songName = songInput.value.trim();
+
+      if (songName && selectedSongs.length < 5) {
+        selectedSongs.push(songName);
+        const songList = document.getElementById('songList');
+        const li = document.createElement('li');
+        li.textContent = songName;
+        songList.appendChild(li);
+        songInput.value = '';  // Clear input after adding
+      } else if (selectedSongs.length >= 5) {
+        alert('You can only add up to 5 songs.');
+      }
+    });
+
+    document.getElementById('nextButton').addEventListener('click', () => {
+      if (selectedSongs.length === 0) {
+        alert('Please add at least one song.');
+        return;
+      }
+
+      fetch('/api/samplesongs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ songs: selectedSongs }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          window.location.href = 'summary.html';  // Redirect to the Summary page
+        }
+      });
+    });
+  </script>
+</body>
+</html>

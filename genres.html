@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Genres</title>
+</head>
+<body>
+    <h1>Select Genres</h1>
+    <form id="genres-form">
+        <label><input type="checkbox" name="genre" value="Dubstep"> Dubstep</label><br>
+        <label><input type="checkbox" name="genre" value="Hip hop"> Hip hop</label><br>
+        <label><input type="checkbox" name="genre" value="Trance"> Trance</label><br>
+        <label><input type="checkbox" name="genre" value="Deep House"> Deep House</label><br>
+        <label><input type="checkbox" name="genre" value="Drum and Bass"> Drum and Bass</label><br>
+        <label><input type="checkbox" name="genre" value="House"> House</label><br>
+        <label><input type="checkbox" name="genre" value="Techno"> Techno</label><br>
+        <label><input type="checkbox" name="genre" value="Electro House"> Electro House</label><br>
+        <label><input type="checkbox" name="genre" value="Electronic"> Electronic</label><br>
+        <button type="submit">Next</button>
+    </form>
+    <script>
+        document.getElementById('genres-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const selectedGenres = Array.from(document.querySelectorAll('input[name="genre"]:checked')).map(el => el.value);
+            fetch('/api/genres', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ genres: selectedGenres })
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = 'moods.html'; // Redirect to moods page
+                } else {
+                    alert('Error: ' + response.statusText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!-- moods.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Moods</title>
+</head>
+<body>
+  <h1>Select Your Moods (up to 2)</h1>
+  <form id="moodForm">
+    <label><input type="checkbox" name="moods" value="Chill"> Chill</label>
+    <label><input type="checkbox" name="moods" value="Energetic"> Energetic</label>
+    <label><input type="checkbox" name="moods" value="Happy"> Happy</label>
+    <label><input type="checkbox" name="moods" value="Sad"> Sad</label>
+    <!-- Add more moods as needed -->
+
+    <button type="button" id="nextButton">Next</button>
+  </form>
+
+  <script>
+    document.getElementById('nextButton').addEventListener('click', () => {
+      const form = document.getElementById('moodForm');
+      const selectedMoods = Array.from(form.moods)
+        .filter(mood => mood.checked)
+        .map(mood => mood.value);
+
+      if (selectedMoods.length > 2) {
+        alert('You can select up to 2 moods.');
+        return;
+      }
+
+      // POST the selected moods to the server
+      fetch('/api/moods', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ moods: selectedMoods }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          window.location.href = 'languages.html';  // Redirect to Languages page
+        }
+      });
+    });
+  </script>
+</body>
+</html>

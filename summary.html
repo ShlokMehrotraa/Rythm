@@ -1,0 +1,42 @@
+<!-- summary.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Summary</title>
+</head>
+<body>
+  <h1>Summary of Your Selections</h1>
+  <ul id="summaryList"></ul>
+
+  <button type="button" id="confirmButton">Confirm</button>
+  <button type="button" id="playlistButton">Go to Playlists</button>
+
+  <script>
+    // Fetch summary from backend
+    fetch('/api/summary')
+    .then(response => response.json())
+    .then(data => {
+      const summaryList = document.getElementById('summaryList');
+      
+      summaryList.innerHTML = `
+        <li><strong>Genres:</strong> ${data.selectedGenres.join(', ')}</li>
+        <li><strong>Moods:</strong> ${data.selectedMoods.join(', ')}</li>
+        <li><strong>Duration:</strong> ${data.setDuration} minutes</li>
+        <li><strong>Sample Songs:</strong> ${data.sampleSongs.join(', ')}</li>
+        <li><strong>Languages:</strong> ${data.selectedLanguages.join(', ')}</li>
+      `;
+    });
+
+    document.getElementById('confirmButton').addEventListener('click', () => {
+      alert('Your preferences have been saved!');
+      // Additional confirmation logic here
+    });
+
+    // Redirect to playlists page
+    document.getElementById('playlistButton').addEventListener('click', () => {
+      window.location.href = 'playlists.html';  // Redirect to Playlists page
+    });
+  </script>
+</body>
+</html>
